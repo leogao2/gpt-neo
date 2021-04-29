@@ -43,6 +43,7 @@ def parse_args():
     parser.add_argument("--sacred_id", type=str, default="nosacred", help="Sacred run id.")
     parser.add_argument("--entmax_sampling", action="store_true", help="(experimental) use entmax sampling")
     parser.add_argument("--export", action="store_true", help="If set, will export the model.")
+    parser.add_argument("--json_save", type=str)
     args = parser.parse_args()
     assert args.model is not None, "Model must be set"
     return args
@@ -190,7 +191,7 @@ def main(args):
                 return x.item()
             return x
         eval_results = {k: as_python(v) for k, v in eval_results.items()}
-        with open(f'eval_{args.sacred_id}.jsonl', 'a') as fh:
+        with open(f'eval_{args.sacred_id}.jsonl' if args.json_save is None else args.json_save, 'a') as fh:
             json.dump({'task': task, 'current_step': current_step, **eval_results}, fh)
             fh.write('\n')
 
