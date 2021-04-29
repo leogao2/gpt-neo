@@ -24,6 +24,7 @@ parser.add_argument('--tpu', type=str, required=True) # Name of TPU to train on,
 parser.add_argument('--model', type=str, required=True) # JSON file that contains model parameters
 parser.add_argument('--experiment_name', type=str, required=True) # name of experiment (will show up in omniboard)
 parser.add_argument('--steps_per_checkpoint', type=int, default=5000)
+parser.add_argument('--json_save', type=str)
 parser.add_argument('--autostack', action="store_false")
 parser.add_argument('--auto_layout', action="store_true")
 parser.add_argument('--auto_layout_and_mesh_shape', action="store_true")
@@ -220,8 +221,8 @@ def main(_run):
                 seen_predictions.add(f)
             
             # collect eval metrics from jsonl
-            if os.path.exists(f'eval_{_run._id}.jsonl'):
-                with open(f'eval_{_run._id}.jsonl') as fh:
+            if os.path.exists(f'eval_{_run._id}.jsonl' if args.json_save is None else args.json_save):
+                with open(f'eval_{_run._id}.jsonl' if args.json_save is None else args.json_save) as fh:
                     for line in fh:
                         ob = json.loads(line)
                         val_step = ob['global_step']
