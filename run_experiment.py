@@ -16,6 +16,7 @@ import subprocess
 import queue
 import sys
 import signal
+from pyfra import *
 
 
 parser = argparse.ArgumentParser()
@@ -96,7 +97,13 @@ def train_thread(args, tpu, id, q):
         return
     print("Recreating {} in 60sec...".format(tpu))
     time.sleep(60)
-    os.system("pu recreate {} --yes --retry 3600 --retry-randomness 1.5".format(tpu))
+    
+    live_tpus = []
+    # check if tpu actually exists
+    while tpu not in live_tpus:
+        os.system("pu recreate {} --yes --retry 3600 --retry-randomness 1.5".format(tpu))
+        live_tpus = sh("pu list").split('\n')[1:] >> filt(lambda x: "READY" in x) >> each(columns, lambda x: x[4]) >> do(listify)
+        print(live_tpus)
     print('recreate done, exiting train_thread')
     
     # clear out queue
