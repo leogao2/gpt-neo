@@ -16,4 +16,4 @@ absl-py
 ftfy
 sacred
 pymongo
-pyfra
+git+https://github.com/EleutherAI/pyfra/
