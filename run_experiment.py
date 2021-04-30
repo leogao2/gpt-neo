@@ -101,7 +101,7 @@ def train_thread(args, tpu, id, q):
     print("Recreating {} in 60sec...".format(tpu))
     time.sleep(60)
     
-    live_tpus = []
+    live_tpus = sh("pu list").split('\n')[1:] >> filt(lambda x: "READY" in x) >> each(columns, lambda x: x[4]) >> do(listify)
     # check if tpu actually exists
     while tpu not in live_tpus:
         os.system("pu recreate {} --yes --retry 3600 --retry-randomness 1.5".format(tpu))
