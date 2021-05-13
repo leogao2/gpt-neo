@@ -25,6 +25,7 @@ parser.add_argument('--model', type=str, required=True) # JSON file that contain
 parser.add_argument('--experiment_name', type=str, required=True) # name of experiment (will show up in omniboard)
 parser.add_argument('--steps_per_checkpoint', type=int, default=5000)
 parser.add_argument('--json_save', type=str)
+parser.add_argument('--force_curr_step', type=int)
 parser.add_argument('--autostack', action="store_false")
 parser.add_argument('--auto_layout', action="store_true")
 parser.add_argument('--auto_layout_and_mesh_shape', action="store_true")
@@ -64,6 +65,7 @@ def train_thread(args, tpu, id, q):
             opts += ' --' + flag
     
     if args.json_save is not None: opts += " --json_save " + args.json_save
+    if args.force_curr_step is not None: opts += " --force_curr_step " + args.force_curr_step
 
     cmd = "python3 main.py --tpu {tpu} --model run_configs/config_{id}.json --steps_per_checkpoint {steps_per_checkpoint} {opts} --sacred_id {run_id}".format(tpu=tpu, id=id, steps_per_checkpoint=args.steps_per_checkpoint, opts=opts, run_id=id)
     print('Running:', cmd)
