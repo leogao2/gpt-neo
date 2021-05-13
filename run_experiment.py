@@ -35,6 +35,7 @@ parser.add_argument('--test', action='store_true')
 parser.add_argument('--eval', action='store_true')
 parser.add_argument('--predict', action='store_true')
 parser.add_argument('--no_delete_tpu', action='store_true')
+parser.add_argument('--opt_init_step', action='store_true')
 parser.add_argument('--initial_heartbeat_timeout', type=int, default=7200)
 parser.add_argument('--heartbeat_timeout', type=int, default=1800) # kill and restart if nothing logged to tensorboard in this many seconds
 args = parser.parse_args()
@@ -57,7 +58,7 @@ def train_thread(args, tpu, id, q):
 
     # pass binary flags through
     opts = ''
-    for flag in ['auto_layout', 'auto_layout_and_mesh_shape', 'new', 'test', 'predict', 'eval', ]:
+    for flag in ['auto_layout', 'auto_layout_and_mesh_shape', 'new', 'test', 'predict', 'eval', 'opt_init_step']:
         if args.__getattribute__(flag):
             opts += ' --' + flag
 
