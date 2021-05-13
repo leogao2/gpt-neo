@@ -152,7 +152,7 @@ def main(args):
 
     estimator = tpu_estimator.TPUEstimator(
         use_tpu=params["use_tpu"],
-        model_fn=model_fn,
+        model_fn=partial(model_fn, force_curr_step=force_curr_step),
         config=config,
         train_batch_size=params["train_batch_size"],
         eval_batch_size=params["train_batch_size"],
@@ -232,7 +232,7 @@ def main(args):
             next_checkpoint = min(current_step + args.steps_per_checkpoint,
                                   params["train_steps"])
 
-            estimator.train(input_fn=partial(input_fn, global_step=current_step, eval=False, force_curr_step=force_curr_step), max_steps=next_checkpoint)
+            estimator.train(input_fn=partial(input_fn, global_step=current_step, eval=False), max_steps=next_checkpoint)
             current_step = next_checkpoint
 
             if params["predict_steps"] > 0:
@@ -252,7 +252,7 @@ def main(args):
         # Else, just train
         while current_step < params["train_steps"]:
             # Else, don't stop and restart
-            estimator.train(input_fn=partial(input_fn, global_step=current_step, eval=False, force_curr_step=force_curr_step), max_steps=params["train_steps"])
+            estimator.train(input_fn=partial(input_fn, global_step=current_step, eval=False), max_steps=params["train_steps"])
 
 
 if __name__ == "__main__":
