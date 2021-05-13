@@ -12,7 +12,7 @@ from models.gpt2 import gpt2
 import math
 
 
-def model_fn(features, labels, mode, params, force_global_step=None):
+def model_fn(features, labels, mode, params, force_global_step=None, init_step=0):
     # Get global step
     global_step = tf.train.get_global_step()
     if force_global_step is not None: global_step.assign(force_global_step)
@@ -191,10 +191,10 @@ def model_fn(features, labels, mode, params, force_global_step=None):
             # If we are splitting the batch into microbatches, var grads are created in the serialize_training_step fn
             # So we pass them in here
             _, update_ops, var_grads = get_optimizer(mesh, loss, params, variable_dtype=variable_dtype,
-                                                     inp_var_grads=var_grads)
+                                                     inp_var_grads=var_grads, init_step=init_step)
         else:
             # Otherwise, they are created in the get_optimizer fn, so we leave inp_var_grads blank
-            _, update_ops, var_grads = get_optimizer(mesh, loss, params, variable_dtype=variable_dtype)
+            _, update_ops, var_grads = get_optimizer(mesh, loss, params, variable_dtype=variable_dtype, init_step=init_step)
         # Log summaries to tensorboard
         mtf.scalar_summary("loss", loss)
         # Log gradients if in params
