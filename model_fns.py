@@ -12,9 +12,10 @@ from models.gpt2 import gpt2
 import math
 
 
-def model_fn(features, labels, mode, params):
+def model_fn(features, labels, mode, params, force_global_step=None):
     # Get global step
     global_step = tf.train.get_global_step()
+    if force_global_step is not None: global_step.assign(force_global_step)
 
     # Construct mtf graph + mesh from params
     graph = mtf.Graph()
