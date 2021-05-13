@@ -18,3 +18,4 @@ sacred
 pymongo
 git+https://github.com/EleutherAI/pyfra/
 parse
+tensorboard==2.4.1
