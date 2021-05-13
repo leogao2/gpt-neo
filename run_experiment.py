@@ -70,7 +70,7 @@ def train_thread(args, tpu, id, q):
     latest_ckpt = latest_model_index(jread(f"configs/{args.model}.json")["model_path"])
     print("latest ckpt in dir:", latest_ckpt)
     
-    if args.force_curr_step is not None and latest_ckpt == 0: opts += " --force_curr_step " + args.force_curr_step
+    if args.force_curr_step is not None and latest_ckpt == 0: opts += f" --force_curr_step {args.force_curr_step}"
 
     cmd = "python3 main.py --tpu {tpu} --model run_configs/config_{id}.json --steps_per_checkpoint {steps_per_checkpoint} {opts} --sacred_id {run_id}".format(tpu=tpu, id=id, steps_per_checkpoint=args.steps_per_checkpoint, opts=opts, run_id=id)
     print('Running:', cmd)
