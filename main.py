@@ -43,6 +43,7 @@ def parse_args():
     parser.add_argument("--sacred_id", type=str, default="nosacred", help="Sacred run id.")
     parser.add_argument("--entmax_sampling", action="store_true", help="(experimental) use entmax sampling")
     parser.add_argument("--export", action="store_true", help="If set, will export the model.")
+    parser.add_argument("--opt_init_step", action="store_true")
     parser.add_argument("--json_save", type=str)
     parser.add_argument("--force_curr_step", type=int)
     args = parser.parse_args()
@@ -152,7 +153,7 @@ def main(args):
 
     estimator = tpu_estimator.TPUEstimator(
         use_tpu=params["use_tpu"],
-        model_fn=partial(model_fn, force_global_step=args.force_curr_step),
+        model_fn=partial(model_fn, force_global_step=args.force_curr_step, init_step=current_step if args.opt_init_step else 0),
         config=config,
         train_batch_size=params["train_batch_size"],
         eval_batch_size=params["train_batch_size"],
