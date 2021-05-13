@@ -17,6 +17,7 @@ import queue
 import sys
 import signal
 from pyfra import *
+from parse import parse
 
 
 parser = argparse.ArgumentParser()
@@ -65,7 +66,11 @@ def train_thread(args, tpu, id, q):
             opts += ' --' + flag
     
     if args.json_save is not None: opts += " --json_save " + args.json_save
-    if args.force_curr_step is not None: opts += " --force_curr_step " + args.force_curr_step
+        
+    latest_ckpt = latest_model_index(jread(f"configs/{args.model}.json")["model_path"])
+    print("latest ckpt in dir:", latest_ckpt)
+    
+    if args.force_curr_step is not None and latest_ckpt == 0: opts += " --force_curr_step " + args.force_curr_step
 
     cmd = "python3 main.py --tpu {tpu} --model run_configs/config_{id}.json --steps_per_checkpoint {steps_per_checkpoint} {opts} --sacred_id {run_id}".format(tpu=tpu, id=id, steps_per_checkpoint=args.steps_per_checkpoint, opts=opts, run_id=id)
     print('Running:', cmd)
@@ -165,6 +170,24 @@ def get_run_data(port):
         import traceback
         traceback.print_exc()
     return r
+
+def trim_slash(x):
+    if x is None: return x
+    if x[-1] == '/': return x[:-1]
+    return x
+
+def latest_model_index(model_path):
+    model_path = trim_slash(model_path)
+    files = sh(f"gsutil ls {model_path}")
+
+    latest = [
+        parse(model_path + "/model.ckpt-{}.meta", f)
+        for f in files.split('\n')
+    ] >> filt(identity) >> each(lambda x: x[0], int) >> do(sorted, list, lambda x: x[-1])
+
+    print("Latest checkpoint:", latest)
+
+    return latest
 
 
 @ex.main
