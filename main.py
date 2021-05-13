@@ -44,6 +44,7 @@ def parse_args():
     parser.add_argument("--entmax_sampling", action="store_true", help="(experimental) use entmax sampling")
     parser.add_argument("--export", action="store_true", help="If set, will export the model.")
     parser.add_argument("--json_save", type=str)
+    parser.add_argument("--force_curr_step", type=int)
     args = parser.parse_args()
     assert args.model is not None, "Model must be set"
     return args
@@ -67,6 +68,8 @@ def main(args):
 
     # get current step
     current_step = int(estimator_lib._load_global_step_from_checkpoint_dir(params["model_path"]))
+    if force_curr_step is not None:
+        current_step = args.force_curr_step
     logger.info(f"Current step {current_step}")
 
     if params["mlm_training"]:
