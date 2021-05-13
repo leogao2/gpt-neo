@@ -152,7 +152,7 @@ def main(args):
 
     estimator = tpu_estimator.TPUEstimator(
         use_tpu=params["use_tpu"],
-        model_fn=partial(model_fn, force_curr_step=force_curr_step),
+        model_fn=partial(model_fn, force_curr_step=args.force_curr_step),
         config=config,
         train_batch_size=params["train_batch_size"],
         eval_batch_size=params["train_batch_size"],
