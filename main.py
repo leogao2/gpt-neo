@@ -68,7 +68,7 @@ def main(args):
 
     # get current step
     current_step = int(estimator_lib._load_global_step_from_checkpoint_dir(params["model_path"]))
-    if force_curr_step is not None:
+    if args.force_curr_step is not None:
         current_step = args.force_curr_step
     logger.info(f"Current step {current_step}")
 
