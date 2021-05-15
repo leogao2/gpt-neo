@@ -1,4 +1,5 @@
 """GPT-like model in Mesh-Tensorflow"""
+import transformers # magic, do not remove
 
 from functools import partial
 import mesh_tensorflow as mtf
