@@ -151,7 +151,7 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
             h += pos_emb
 
     aux_losses = 0  # instantiate auxiliary losses (for MOE models)
-
+    l_aux_losses = []
     labels = mtf_features["labels"]
     z_loss = params.get("z_loss", 1e-4)
     seq_dim = sequence_dim if not is_incremental_inference(context) else mtf.Dimension("sequence", 1)
@@ -178,7 +178,7 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
         aux_loss = mtf.reduce_mean(mtf.layers.softmax_cross_entropy_with_logits(logits=logits, targets=labels,
                                  vocab_dim=logits.shape[-1], z_loss=z_loss))
         # auxillary experiment 
-        mtf.scalar_summary("loss_aux_{}".format(layer), aux_loss)
+        l_aux_losses.append(aux_loss)
         aux_losses += loss + aux_loss
 
     no_weight_tie_emb = params["no_weight_tie"] == True
@@ -222,4 +222,4 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
 
     # Cast back to checkpoint dtype
     logits = mtf.cast(logits, variable_dtype.master_dtype)
-    return logits, loss, loss_batch
+    return logits, loss, loss_batch, l_aux_losses
