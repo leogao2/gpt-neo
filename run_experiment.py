@@ -177,8 +177,8 @@ def trim_slash(x):
     if x[-1] == '/': return x[:-1]
     return x
 
-def latest_model_index(rem, model_path):
-    files = rem.sh(f"gsutil ls {model_path}", ignore_errors=True)
+def latest_model_index(model_path):
+    files = sh(f"gsutil ls {model_path}", ignore_errors=True)
 
     if 'CommandException: One or more URLs matched no objects.' in files:
         return 0
