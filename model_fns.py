@@ -169,6 +169,7 @@ def model_fn(features, labels, mode, params, force_global_step=None, init_step=0
         loss = output_dict["loss"]
         loss_batch = output_dict["loss_batch"]
         logits = output_dict["logits"]
+        loss_aux = [output_dict[f"loss_aux_{i}"] for i in range(params["n_layer"])]
     else:
         # If we're not splitting into microbatches, return logits & loss as is
         if params["model"] == "GPT":
