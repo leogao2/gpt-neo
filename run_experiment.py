@@ -183,8 +183,6 @@ def latest_model_index(model_path):
     if 'CommandException: One or more URLs matched no objects.' in files:
         return 0
 
-    from icecream import ic
-    ic(files.split('\n'))
     latest = [
         parse(trim_slash(model_path) + "/model.ckpt-{}.meta", f)
         for f in files.split('\n')
