@@ -183,11 +183,13 @@ def latest_model_index(model_path):
     if 'CommandException: One or more URLs matched no objects.' in files:
         return 0
 
-    latest = [
-        parse(trim_slash(model_path) + "/model.ckpt-{}.meta", f)
-        for f in files.split('\n')
-    ] >> filt(identity) >> each(lambda x: x[0], int) >> do(sorted, list, lambda x: x[-1])
-
+    try:
+        latest = [
+            parse(trim_slash(model_path) + "/model.ckpt-{}.meta", f)
+            for f in files.split('\n')
+        ] >> filt(identity) >> each(lambda x: x[0], int) >> do(sorted, list, lambda x: x[-1])
+    except IndexError:
+        return 0
     print("Latest checkpoint:", latest)
 
     return latest
