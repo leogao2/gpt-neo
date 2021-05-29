@@ -1,6 +1,7 @@
 """GPT-like model in Mesh-Tensorflow"""
 import tensorflow.compat.v1 as tf
 import mesh_tensorflow.transformer as mtf_transformer
+import mesh_tensorflow as mtf
 
 from models.utils import parse_inputs, entmax_cross_entropy_with_logits
 from models.layers import *
@@ -151,6 +152,9 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
 
     aux_losses = 0  # instantiate auxiliary losses (for MOE models)
 
+    labels = mtf_features["labels"]
+    z_loss = params.get("z_loss", 1e-4)
+    
     for layer in range(params["n_layer"]):
         # attn blocks
         share_parameters = exists(params["share_parameters"]) and params["share_parameters"] == True
@@ -167,7 +171,14 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
         # If true and in train mode, enable gradient checkpointing
         recompute_grad = params["recompute_grad"] and (params["mode"] == "train") == True
         h, loss = block_fn(h) if not recompute_grad else mtf.recompute_grad(block_fn, [h])
-        aux_losses += loss
+        
+        logits = mtf.einsum([h, wte], output_shape=[batch_dim, seq_dim, vocab_dim])
+        logits = mtf.cast(logits, tf.float32)
+        aux_loss = mtf.layers.softmax_cross_entropy_with_logits(logits=logits, targets=labels,
+                                 vocab_dim=logits.shape[-1], z_loss=z_loss)
+        # auxillary experiment 
+        mtf.scalar_summary("loss_aux_{}".format(layer), aux_loss)
+        aux_losses += loss + aux_loss
 
     no_weight_tie_emb = params["no_weight_tie"] == True
     if no_weight_tie_emb:
@@ -182,9 +193,6 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
             logits = mtf.einsum([h, wte], output_shape=[batch_dim, seq_dim, vocab_dim])
 
     if params["mode"] in ["train", "eval"]:
-        labels = mtf_features["labels"]
-        z_loss = params.get("z_loss", 1e-4)  # an auxiliary loss used to stabilize mtf xentropy
-
         # Go to full precision for the logits 
         logits = mtf.cast(logits, tf.float32)
 
