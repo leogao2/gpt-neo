@@ -175,8 +175,8 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
         
         logits = mtf.einsum([h, wte], output_shape=[batch_dim, seq_dim, vocab_dim])
         logits = mtf.cast(logits, tf.float32)
-        aux_loss = mtf.layers.softmax_cross_entropy_with_logits(logits=logits, targets=labels,
-                                 vocab_dim=logits.shape[-1], z_loss=z_loss)
+        aux_loss = mtf.reduce_mean(mtf.layers.softmax_cross_entropy_with_logits(logits=logits, targets=labels,
+                                 vocab_dim=logits.shape[-1], z_loss=z_loss))
         # auxillary experiment 
         mtf.scalar_summary("loss_aux_{}".format(layer), aux_loss)
         aux_losses += loss + aux_loss
