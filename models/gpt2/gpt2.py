@@ -1,6 +1,7 @@
 """GPT-like model in Mesh-Tensorflow"""
 import tensorflow.compat.v1 as tf
 import mesh_tensorflow.transformer as mtf_transformer
+import mesh_tensorflow as mtf
 
 from models.utils import parse_inputs, entmax_cross_entropy_with_logits
 from models.layers import *
@@ -167,6 +168,7 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
         # If true and in train mode, enable gradient checkpointing
         recompute_grad = params["recompute_grad"] and (params["mode"] == "train") == True
         h, loss = block_fn(h) if not recompute_grad else mtf.recompute_grad(block_fn, [h])
+        mtf.scalar_summary("loss_aux_{}".format(layer), loss)
         aux_losses += loss
 
     no_weight_tie_emb = params["no_weight_tie"] == True
