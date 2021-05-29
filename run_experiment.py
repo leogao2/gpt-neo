@@ -177,14 +177,18 @@ def trim_slash(x):
     if x[-1] == '/': return x[:-1]
     return x
 
-def latest_model_index(model_path):
-    model_path = trim_slash(model_path)
-    files = sh(f"gsutil ls {model_path}")
+def latest_model_index(rem, model_path):
+    files = rem.sh(f"gsutil ls {model_path}", ignore_errors=True)
 
+    if 'CommandException: One or more URLs matched no objects.' in files:
+        return 0
+
+    from icecream import ic
+    ic(files.split('\n'))
     latest = [
-        parse(model_path + "/model.ckpt-{}.meta", f)
+        parse(trim_slash(model_path) + "/model.ckpt-{}.meta", f)
         for f in files.split('\n')
-    ] >> filt(identity) >> each(lambda x: x[0], int) >> do(sorted, list, lambda x: x[-1])
+    ] >> filt(identity) >> each(lambda x: x[0], int) >> do(sorted, list, ic, lambda x: x[-1])
 
     print("Latest checkpoint:", latest)
 
