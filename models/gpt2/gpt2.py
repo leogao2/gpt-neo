@@ -154,6 +154,7 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
 
     labels = mtf_features["labels"]
     z_loss = params.get("z_loss", 1e-4)
+    seq_dim = sequence_dim if not is_incremental_inference(context) else mtf.Dimension("sequence", 1)
     
     for layer in range(params["n_layer"]):
         # attn blocks
@@ -187,7 +188,6 @@ def model(mtf_features, other_features, params, mesh, variable_dtype, context=No
     else:
         # Layer normalize & affine transform
         h = layer_norm(h, "ln_f", variable_dtype=variable_dtype)
-        seq_dim = sequence_dim if not is_incremental_inference(context) else mtf.Dimension("sequence", 1)
         with tf.variable_scope("wte_final_einsum"):
             # Equivalent to tf.matmul
             logits = mtf.einsum([h, wte], output_shape=[batch_dim, seq_dim, vocab_dim])
