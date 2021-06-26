@@ -68,7 +68,7 @@ def train_thread(args, tpu, id, q):
     
     if args.json_save is not None: opts += " --json_save " + args.json_save
         
-    latest_ckpt = latest_model_index(jread(f"configs/{args.model}.json")["model_path"])
+    latest_ckpt = latest_model_index(file(f"configs/{args.model}.json").jread()["model_path"])
     print("latest ckpt in dir:", latest_ckpt)
     
     if args.force_curr_step is not None and latest_ckpt == 0: opts += f" --force_curr_step {args.force_curr_step}"
